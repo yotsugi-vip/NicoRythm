@@ -1,27 +1,37 @@
+import nico2
 
 class musicPlayer():
 
     def __init__( self ):
 
-        playQueue = list()
-        playQueue.append( {"URL":"https://nicovideo", "THUMB":"https://....", "TITLE":"1"} )
-        playQueue.append( {"URL":"https://nicovideo/ssss", "THUMB":"https://....", "TITLE":"2"} )
-        print( playQueue )
+        self.playQueue:list = list()
+        self.notPlaying = { "title": "not playing" }
+        self.nowPlaying = self.notPlaying
+        self.nc = nico2.nico2py()
 
     def play( self ):
-        pass
 
-    def skip( self ):
-        pass
+        self.nowPlaying = self.playQueue.pop()
+        return self.nowPlaying
+        
+    def addQueue( self, smUrl ):
+        self.playQueue.append( self.nc.getInfo(smUrl) )
 
-    def stop( self ):
-        pass
+    def removeQueue( self, index ):
 
-    def addQueue( self ):
-        pass
+        self.playQueue.remove( self.playQueue[index] )
 
-    def removeQueue( self ):
-        pass
-    
+    def showQueue( self ):
+        
+        ql = "{0} : {1}\n".format( "now", self.nowPlaying["title"] )
+
+        for i in range( len(self.playQueue) ):
+            
+            ql += "{0} : {1}\n".format( i, self.playQueue[i]["title"] )
+
+        return ql
+
     def now( self ):
-        pass
+        
+        m = "now : {0}".format( self.nowPlaying["title"] )
+        return m

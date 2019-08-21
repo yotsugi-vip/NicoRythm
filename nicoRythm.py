@@ -4,7 +4,7 @@ import nico2
 
 client = discord.Client()
 nc = nico2.nico2py()
-vc = None
+vc:discord.VoiceClient = None
 
 @client.event
 async def on_ready():
@@ -33,11 +33,15 @@ async def on_message(message):
                 vc = await message.author.voice.channel.connect()
                 await message.channel.send( "connect!" )
             
-            l = message.content.split(" ")
-        
-            vc.play( discord.FFmpegPCMAudio(  nc.getVideo( l[1] ) ) )
-            vc.source = discord.PCMVolumeTransformer( vc.source )
-            vc.source.volume = 0.05
+            if vc.is_playing():
+                pass
+                
+            else:
+                l = message.content.split(" ")
+            
+                vc.play( discord.FFmpegPCMAudio(  nc.getVideo( l[1] ) ) )
+                vc.source = discord.PCMVolumeTransformer( vc.source )
+                vc.source.volume = 0.05
 
             await message.channel.send( "play" )
 
