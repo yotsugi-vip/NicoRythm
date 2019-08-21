@@ -5,13 +5,16 @@ class musicPlayer():
     def __init__( self ):
 
         self.playQueue:list = list()
-        self.notPlaying = { "title": "not playing" }
+        self.notPlaying = { "title": None }
         self.nowPlaying = self.notPlaying
         self.nc = nico2.nico2py()
 
     def play( self ):
+        try:
+            self.nowPlaying = self.playQueue.pop()
+        except IndexError:
+            self.nowPlaying = self.notPlaying
 
-        self.nowPlaying = self.playQueue.pop()
         return self.nowPlaying
         
     def addQueue( self, smUrl ):
