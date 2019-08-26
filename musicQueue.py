@@ -1,15 +1,12 @@
-import nico2
-
-class musicPlayer():
+class QueueCtrl( ):
 
     def __init__( self ):
 
         self.playQueue:list = list()
         self.notPlaying = { "title": None }
         self.nowPlaying = self.notPlaying
-        self.nc = nico2.nico2py()
 
-    def play( self ):
+    def popQueue( self ):
         try:
             self.nowPlaying = self.playQueue.pop()
         except IndexError:
