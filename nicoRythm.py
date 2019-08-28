@@ -1,35 +1,10 @@
+import time
 import discord
 import myToken
-import nico2
-import musicQueue
-import time
-import threading
+import response as res
 
 client = discord.Client()
-nc = nico2.nico2py()
 vc:discord.VoiceClient = None
-mQueue = musicQueue.QueueCtrl()
-isPlay = False
-
-def playcheck( ):
-    global vc
-    global isPlay
-
-    if isPlay:
-        print("start")
-
-    while isPlay:
-        if vc.is_paused()  == False:
-            time.sleep(0.5)
-            if vc.is_playing() == False:
-                mQueue.popQueue()
-                src = nc.getVideo( mQueue.nowPlaying["url"] )
-                time.sleep( 5 )
-                vc.play( discord.FFmpegPCMAudio( src ) )
-                vc.source = discord.PCMVolumeTransformer( vc.source )
-                vc.source.volume = 0.1
-
-            
 
 @client.event
 async def on_ready():
@@ -40,78 +15,38 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-
     global vc
-    global nc
-    global isPlay
-    t1 = threading.Thread( target=playcheck )
+    m_content = message.content
 
-    if message.content == "e":
-        await client.logout()
-    
-    elif message.content.startswith("#play"):
-
+    if m_content.startswith("#p"):
         # 接続処理
         if vc == None:
-            voice_ch = message.author.voice.channel
-            vc = await voice_ch.connect()
+            vc = await message.author.voice.channel.connect()
             await message.channel.send( "connect!" )
-        
-        if message.content == "#play":
-
-            # 再開
-            if vc.is_paused():
-                vc.resume()
-
-        # キュー追加
-        elif message.content.find( "https://www.nicovideo.jp/watch/" ) >= 0:
-            mQueue.addQueue( message.content.split(" ")[1] )
-            mQueue.now()
-            # 新規再生
-            if not vc.is_playing():
-                
-                mQueue.popQueue()
-                src = nc.getVideo( mQueue.nowPlaying["url"] )
-                time.sleep( 5 )
-                vc.play( discord.FFmpegPCMAudio( src ) )
-                vc.source = discord.PCMVolumeTransformer( vc.source )
-                vc.source.volume = 0.1
-                isPlay = True
-                t1.start()         
-
-        await message.channel.send( "play" )
-
-    elif message.content == "#stop":
-
-        # 一時停止
-        vc.pause()
-        await message.channel.send( "pause" )
-
-    elif message.content == "#skip":
-        
-        await message.channel.send( "skip" )
-        vc.stop()
-        nc.isDownload = False
     
-    elif message.content == "#queue":
-        
-        await message.channel.send( mQueue.showQueue() )
+        await message.channel.send( res.player_play( vc, m_content ) )
 
-    elif message.content.startswith("#remove"):
+    elif m_content == "#stop":
+        await message.channel.send( res.player_stop( vc ) )
 
-        if int( message.content.split(" ")[1] ) >= 0:
-            mQueue.removeQueue( int( message.content.split(" ")[1] ) )
-            await message.channel.send( "ABC" )
-        
-        else:
-            await message.channel.senf( "error invalid index" )
+    elif m_content == "#skip" or m_content == "#s":
+        await message.channel.send( res.player_skip(vc) )
+    
+    elif m_content == "#queue" or m_content == "#q":
+        await message.channel.send( res.player_queue() )
 
-    elif message.content == "#now":
-        await message.channel.send( mQueue.now() )
+    elif m_content.startswith("#r"):
+        await message.channel.send( res.player_remove( vc, message.content ) )
 
-    elif message.content == "dc":
+    elif m_content == "#now" or m_content == "#n":
+        await message.channel.send( res.player_now( vc ) )
+
+    elif m_content == "dc":
         await vc.disconnect()
-        vc = None
         await message.channel.send("disconnect")        
+        vc = None
         
+    if m_content == "e":
+        await client.logout()
+
 client.run( myToken.discord_token )

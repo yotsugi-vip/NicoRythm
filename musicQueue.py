@@ -23,8 +23,10 @@ class QueueCtrl( ):
         return( dic["title"] )
 
     def removeQueue( self, index ):
-
+        
+        ret = self.playQueue[index]
         self.playQueue.remove( self.playQueue[index] )
+        return ret
 
     def showQueue( self ):
         
@@ -38,5 +40,5 @@ class QueueCtrl( ):
 
     def now( self ):
         
-        m = "now : {0}".format( self.nowPlaying["title"] )
+        m = "now `{0}`".format( self.nowPlaying["title"] )
         return m
