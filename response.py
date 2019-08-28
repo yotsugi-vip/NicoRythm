@@ -4,6 +4,8 @@ import time
 import nico2
 import threading
 import os
+import datetime
+import json
 
 isPlay = False
 mQueue = musicQueue.QueueCtrl()
@@ -99,3 +101,51 @@ def player_now( vc:discord.VoiceClient ):
 
 def player_queue( ):
     return mQueue.showQueue()
+
+def add_playlist( listname:str, musicData:str ):
+    global nc
+    playlist = None
+
+    if listname == None:
+        return "no name"
+    else:
+        listname = "playlists/{0}.json".format( listname )
+
+    if os.path.exists( listname ):
+        with open( listname, "r" ) as fp:
+            playlist = json.load(fp)
+    else:
+        with open( "playlists/emptylist.json", "r" ) as fp:
+            playlist = json.load(fp)
+        
+    playlist["playlist"].append( nc.getInfo( musicData ) )
+
+    with open(listname,"w") as fp:
+        json.dump( playlist, fp, indent=4 )
+    return "Queue Added"
+    
+def addQueue_playlist( listname:str, vc:discord.VoiceClient ):
+    global mQueue
+    playlist = None
+
+    if not os.path.exists( "playlists/{0}.json".format(listname) ):
+        return "Err list not exists"
+
+    else:
+        with open( "playlists/{0}.json".format(listname), "r") as fp:
+            playlist = json.load(fp)
+            for item in playlist["playlist"]:
+                player_play( vc, " {0}".format( item["url"] ))
+
+def show_Queue( listname:str ):
+    playlist = None
+    ret = ""
+    if not os.path.exists( "playlists/{0}.json".format(listname) ):
+        return "Err list not exists"
+
+    else:
+        with open( "playlists/{0}.json".format(listname), "r") as fp:
+            playlist = json.load(fp)
+            for item in playlist["playlist"]:
+                ret +="{0}:{1}\n".format( item["title"], item["url"] )                
+        return ret

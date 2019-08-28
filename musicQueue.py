@@ -11,7 +11,7 @@ class QueueCtrl( ):
 
     def popQueue( self ):
         try:
-            self.nowPlaying = self.playQueue.pop()
+            self.nowPlaying = self.playQueue.pop( 0 )
         except IndexError:
             self.nowPlaying = self.notPlaying
 
@@ -42,3 +42,4 @@ class QueueCtrl( ):
         
         m = "now `{0}`".format( self.nowPlaying["title"] )
         return m
+

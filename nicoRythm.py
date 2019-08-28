@@ -24,6 +24,10 @@ async def on_message(message):
             vc = await message.author.voice.channel.connect()
             await message.channel.send( "connect!" )
     
+        if m_content.startswith("#pl") or m_content.startswith("#playlist"):
+            res.addQueue_playlist( m_content.split(" ")[1], vc )
+            return
+
         await message.channel.send( res.player_play( vc, m_content ) )
 
     elif m_content == "#stop":
@@ -40,6 +44,13 @@ async def on_message(message):
 
     elif m_content == "#now" or m_content == "#n":
         await message.channel.send( res.player_now( vc ) )
+
+    elif m_content.startswith("#addlist") or m_content.startswith("#al"):
+        data:list = m_content.split(" ")
+        await message.channel.send( res.add_playlist( data[1], data[2] ) )
+
+    elif m_content.startswith("#showlist") or m_content.startswith("#sl"):
+        await message.channel.send( res.show_Queue( m_content.split(" ")[1] ) )
 
     elif m_content == "dc":
         await vc.disconnect()
