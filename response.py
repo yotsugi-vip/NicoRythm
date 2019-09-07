@@ -1,11 +1,14 @@
-import discord
-import musicQueue
-import time
-import nico2
-import threading
-import os
 import datetime
 import json
+import math
+import os
+import threading
+import time
+
+import discord
+
+import musicQueue
+import nico2
 
 isPlay = False
 mQueue = musicQueue.QueueCtrl()
@@ -23,15 +26,15 @@ def playcheck( vc:discord.VoiceClient, dummy ):
         if vc.is_paused()  == False:
             time.sleep(0.5)
             if vc.is_playing() == False:
-                mQueue.popQueue()
-                src = nc.getVideo( mQueue.nowPlaying["url"] )
-                while os.path.getsize(src) < 128:
-                    pass
+                if mQueue.popQueue() != mQueue.notPlaying:
+                    src = nc.getVideo( mQueue.nowPlaying["url"] )
+                    while os.path.getsize(src) < 128:
+                        pass
 
-                vc.play( discord.FFmpegPCMAudio( src ) )
-                vc.source = discord.PCMVolumeTransformer( vc.source )
-                vc.source.volume = 0.1
-                isPlay = True
+                    vc.play( discord.FFmpegPCMAudio( src ) )
+                    vc.source = discord.PCMVolumeTransformer( vc.source )
+                    vc.source.volume = 0.1
+                    isPlay = True
 
 def player_play( vc:discord.VoiceClient, m:str ):
 
@@ -55,7 +58,9 @@ def player_play( vc:discord.VoiceClient, m:str ):
 
         # 新規再生
         if not vc.is_playing():
-            mQueue.popQueue()
+
+            if mQueue.popQueue() == mQueue.notPlaying:
+                return
             src = nc.getVideo( mQueue.nowPlaying["url"] )
             
             while os.path.getsize(src) < 256:
@@ -95,9 +100,14 @@ def player_remove( vc:discord.VoiceClient, m:str ):
     
     return ret
 
-def player_now( vc:discord.VoiceClient ):
+def player_now( ):
     global mQueue
-    return mQueue.now()
+    emb = discord.Embed()
+    now = mQueue.now()
+    emb.add_field( name="**Now Playing**", value="[{0}]({1})\n`{2}分{3}秒`"\
+        .format( now["title"], now["url"], math.floor(now["duration"]/60), now["duration"]%60 ) )
+    emb.set_thumbnail( url=now["thum"] )
+    return emb
 
 def player_queue( ):
     return mQueue.showQueue()
@@ -134,12 +144,20 @@ def addQueue_playlist( listname:str, vc:discord.VoiceClient ):
     else:
         with open( "playlists/{0}.json".format(listname), "r") as fp:
             playlist = json.load(fp)
-            for item in playlist["playlist"]:
-                player_play( vc, " {0}".format( item["url"] ))
+
+        for i in range( len(playlist["playlist"]) ):
+            if i == 0:
+                player_play( vc, " {0}".format( playlist["playlist"][i]["url"] ) )
+            else:
+                mQueue.playQueue.append( playlist["playlist"][i] )
 
 def show_Queue( listname:str ):
     playlist = None
-    ret = ""
+    emb = discord.Embed()
+    index = 0
+    duration = 0
+    ql = str()
+
     if not os.path.exists( "playlists/{0}.json".format(listname) ):
         return "Err list not exists"
 
@@ -147,5 +165,21 @@ def show_Queue( listname:str ):
         with open( "playlists/{0}.json".format(listname), "r") as fp:
             playlist = json.load(fp)
             for item in playlist["playlist"]:
-                ret +="{0}:{1}\n".format( item["title"], item["url"] )                
+                ql += "`{0}.`[{1}]({2})|`{3}分{4}秒`\n\n".format( index, item["title"], item["url"], math.floor(item["duration"]/60), item["duration"]%60 )
+                index += 1
+                duration += item["duration"]
+            ql += "合計{0}曲\n再生時間:`{1}分{2}秒`".format( index, math.floor(duration/60), duration%60 )
+            emb.add_field( name="**List {0}**".format(listname), value=ql )
+        return emb
+
+def moveQueue( m ):
+    try:
+        global mQueue
+        a = int( m.split()[1] )
+        b = int( m.split()[2] )
+        mQueue.playQueue[a], mQueue.playQueue[b] = mQueue.playQueue[b], mQueue.playQueue[a]
+        ret = True
+    except:
+        ret = False
+    finally:
         return ret
