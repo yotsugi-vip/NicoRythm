@@ -183,3 +183,18 @@ def moveQueue( m ):
         ret = False
     finally:
         return ret
+
+def showHelp():
+    emb = discord.Embed()
+    emb.add_field(name="`#play [url]` `#p [url]`", value="urlの動画を再生\n一時停止時はレジューム",inline=False)
+    emb.add_field(name="`#stop`",value="音声を一時停止する", inline=False)
+    emb.add_field(name="`#skip` `#s`", value="次の曲を再生", inline=False)
+    emb.add_field(name="`#queue` `#q`", value="現在のキューを確認", inline=False)
+    emb.add_field(name="`#move [index] [index]` `#m [index] [index]`", value="キューの順番を入れ替える",inline=False)
+    emb.add_field(name="`#remove [index]`",value="該当キューを削除",inline=False)
+    emb.add_field(name="`#now` `#n`", value="現在の再生曲情報",inline=False)
+    emb.add_field(name="`#addlist [listname] [url]` `#al [listname] [url]`",value="プレイリストに曲を追加する",inline=False)
+    emb.add_field(name="`#showlist [listname]` `#sl [listname]`", value="プレイリストの内容を表示",inline=False)
+    emb.add_field(name="`#disconnect` `#dc`", value="ボイスから切断する",inline=False)
+    emb.title = "**COMMANDS**"
+    return emb

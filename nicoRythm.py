@@ -68,12 +68,8 @@ async def on_message(message):
     if m_content == "e":
         await client.logout()
 
-    if m_content == "t":
-        emb = discord.embeds.Embed()
-        emb.description="description"
-        emb.add_field( name="`Now`", value="[ぬきたし2 ED 「非実在系のわたし達」](https://www.nicovideo.jp/watch/sm35506385)", inline=True )
-        emb.add_field( name = "`Lists`", value="`1`[【迷い猫オーバーラン！】はっぴぃ にゅう にゃあTVサイズ](https://www.nicovideo.jp/watch/sm25247794)\n`2`[ぬきたし2 ED 「非実在系のわたし達」](https://www.nicovideo.jp/watch/sm35506385)" )
-        await message.channel.send(embed = res.show_Queue("nico"))
+    if m_content == "#help":
+        await message.channel.send( embed=res.showHelp() )
 
 
 
