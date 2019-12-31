@@ -8,11 +8,11 @@ import time
 import discord
 
 import musicQueue
-import nico2
+import Nico2py.nico2 as niconico
 
 isPlay = False
 mQueue = musicQueue.QueueCtrl()
-nc = nico2.nico2py()
+nc = niconico.nico2py()
 
 def playcheck( vc:discord.VoiceClient, dummy ):
     global isPlay

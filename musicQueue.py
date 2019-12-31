@@ -2,7 +2,7 @@ import math
 
 import discord
 
-import nico2
+import Nico2py.nico2 as niconico
 
 
 class QueueCtrl( ):
@@ -12,7 +12,7 @@ class QueueCtrl( ):
         self.playQueue:list = list()
         self.notPlaying = { "title": None }
         self.nowPlaying = self.notPlaying
-        self.nc = nico2.nico2py()
+        self.nc = niconico.nico2py()
 
     def popQueue( self ):
         try:
